@@ -29,7 +29,20 @@ RUN apk add --no-cache \
     tzdata \
     bash \
     curl \
+    wget \
+    jq \
     && rm -rf /var/cache/apk/*
+
+# 安装 GitHub CLI (Alpine方式)
+RUN ARCH=$(uname -m) && \
+    if [ "$ARCH" = "x86_64" ]; then ARCH="amd64"; fi && \
+    if [ "$ARCH" = "aarch64" ]; then ARCH="arm64"; fi && \
+    GH_VERSION=$(curl -s https://api.github.com/repos/cli/cli/releases/latest | jq -r '.tag_name' | cut -c2-) && \
+    wget "https://github.com/cli/cli/releases/download/v${GH_VERSION}/gh_${GH_VERSION}_linux_${ARCH}.tar.gz" -O gh.tar.gz && \
+    tar -xzf gh.tar.gz && \
+    mv "gh_${GH_VERSION}_linux_${ARCH}/bin/gh" /usr/local/bin/ && \
+    chmod +x /usr/local/bin/gh && \
+    rm -rf gh*
 
 # 设置时区
 ENV TZ=Asia/Shanghai

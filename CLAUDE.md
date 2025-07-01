@@ -30,8 +30,10 @@ cp .env.example .env
 ### Required Environment Variables
 - `GITHUB_TOKEN`: GitHub Personal Access Token with full repo permissions
 - `WEBHOOK_SECRET`: Secret for webhook validation
-- `ANTHROPIC_API_KEY`: Anthropic Claude API key
 - `PORT`: Server port (default: 8080)
+
+### Optional Environment Variables
+- `ANTHROPIC_API_KEY`: Anthropic Claude API key (如果Claude CLI未登录则需要)
 
 ### Prerequisites
 
@@ -58,12 +60,28 @@ cp .env.example .env
 # 3. 使用docker-compose启动 (推荐)
 docker-compose up -d
 
-# 或者直接使用docker run
+# 或者直接使用docker run (如果已有Claude CLI登录)
 docker run -d \
   --name claude-github-bot \
-  -p 8080:8080 \
+  -p 8888:8080 \
   --env-file .env \
+  -v ~/.claude:/app/.claude:ro \
   ghcr.io/xhy/auto-coding:latest
+```
+
+#### Claude CLI认证说明
+有两种方式进行Claude API认证：
+
+**方式1: 使用已登录的Claude CLI (推荐)**
+```bash
+# 如果你的主机已经登录Claude CLI，直接挂载配置目录
+-v ~/.claude:/app/.claude:ro
+```
+
+**方式2: 使用API Key**
+```bash
+# 在.env文件中设置
+ANTHROPIC_API_KEY=your_api_key_here
 ```
 
 #### 自定义Claude安装源
@@ -81,12 +99,24 @@ environment:
 #### 健康检查
 ```bash
 # 检查服务状态
-curl http://localhost:8080/health
+curl http://localhost:8888/health
 
 # 查看Docker容器状态
 docker ps
 docker logs claude-github-bot
 ```
+
+#### 容器内预装工具
+Docker镜像内已自动安装以下工具：
+- ✅ **Git**: 版本控制工具
+- ✅ **GitHub CLI (gh)**: GitHub官方命令行工具（自动安装最新版本）
+- ✅ **Claude CLI**: Anthropic Claude Code CLI
+- ✅ **Node.js**: JavaScript运行时环境
+- ✅ **curl/wget**: 网络请求工具
+- ✅ **jq**: JSON处理工具
+- ✅ **bash**: Shell环境
+
+无需手动安装，容器启动即可使用所有工具。
 
 ### 镜像构建与发布
 
@@ -138,8 +168,10 @@ When Claude receives an event, it has access to:
 - **No Approval Required**: Can take any action it deems appropriate
 
 ### Available Tools
-- **GitHub CLI (gh)**: Authenticated and ready to use for all GitHub operations
-- **Git**: Standard git commands for version control
+- **GitHub CLI (gh)**: Authenticated and ready to use for all GitHub operations (自动安装最新版本)
+- **Git**: Standard git commands for version control (已预装)
+- **Claude CLI**: Anthropic Claude Code CLI for AI assistance (已预装)
+- **Node.js**: JavaScript runtime environment (已预装)
 - **File System**: Full read/write access to repository files
 
 ## Claude's Autonomous Workflow for Issues

@@ -6,14 +6,14 @@ services:
     container_name: claude-github-bot
     restart: unless-stopped
     ports:
-      - "8080:8080"
+      - "8888:8080"
     environment:
       # GitHub配置 (必需)
       - GITHUB_TOKEN=${GITHUB_TOKEN}
       - WEBHOOK_SECRET=${WEBHOOK_SECRET}
       
-      # Anthropic API配置 (必需)
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      # Anthropic API配置 (可选，如果Claude CLI未登录则需要)
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
       
       # 服务器配置
       - PORT=8080
@@ -39,6 +39,8 @@ services:
       - ${GITHUB_APP_KEY_FILE_PATH:-./github-app.pem}:/app/github-app.pem:ro
       # 工作空间持久化 (可选)
       - ./workspaces:/app/workspaces
+      # Claude CLI配置持久化 (保持登录状态)
+      - ${HOME}/.claude:/app/.claude:ro
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 30s
