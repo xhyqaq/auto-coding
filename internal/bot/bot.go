@@ -14,8 +14,8 @@ import (
 	"github.com/google/go-github/v58/github"
 
 	"github.com/xhy/auto-coding/internal/claude"
-	"github.com/xhy/auto-coding/internal/types"
 	ghclient "github.com/xhy/auto-coding/internal/github"
+	"github.com/xhy/auto-coding/internal/types"
 )
 
 // Bot 实例
@@ -99,12 +99,12 @@ func (b *Bot) eventNeedsRepository(eventType string) bool {
 		"watch":                       false, // 关注操作
 		"fork":                        false, // fork 操作
 	}
-	
+
 	// 默认为需要仓库（保守策略）
 	if needed, exists := repoEvents[eventType]; exists {
 		return needed
 	}
-	
+
 	log.Printf("Unknown event type %s, assuming repository needed", eventType)
 	return true
 }
@@ -144,7 +144,7 @@ func (b *Bot) isSelfGeneratedEvent(eventType string, payload map[string]interfac
 func (b *Bot) isBotUser(username string) bool {
 	botKeywords := []string{"bot", "claude", "github-actions", "[bot]"}
 	username = strings.ToLower(username)
-	
+
 	for _, keyword := range botKeywords {
 		if strings.Contains(username, keyword) {
 			return true

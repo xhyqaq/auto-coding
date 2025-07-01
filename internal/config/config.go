@@ -15,15 +15,15 @@ func Load() *types.BotConfig {
 		AnthropicKey:  os.Getenv("ANTHROPIC_API_KEY"),
 		BotName:       getEnvWithDefault("BOT_NAME", "claude-github-bot"),
 		BotEmail:      getEnvWithDefault("BOT_EMAIL", "bot@example.com"),
-		
+
 		// Claude CLI 配置
 		ClaudeCommand:       getEnvWithDefault("CLAUDE_COMMAND", "npx @anthropic-ai/claude-code"),
 		ClaudeInstallSource: getEnvWithDefault("CLAUDE_INSTALL_SOURCE", "https://registry.npmjs.org/"),
-		
+
 		// Docker 配置
 		DockerRegistry:  getEnvWithDefault("DOCKER_REGISTRY", "ghcr.io"),
 		DockerImageName: getEnvWithDefault("DOCKER_IMAGE_NAME", "claude-github-bot"),
-		
+
 		// GitHub App 配置
 		GitHubAppID:         os.Getenv("GITHUB_APP_ID"),
 		GitHubAppPrivateKey: os.Getenv("GITHUB_APP_PRIVATE_KEY"),

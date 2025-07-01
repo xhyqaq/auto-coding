@@ -30,7 +30,7 @@ func (c *Client) Invoke(workspace string) error {
 	repoDir := workspace + "/repository"
 	workDir := workspace
 	contextPath := ".claude-context.json"
-	
+
 	if _, err := os.Stat(repoDir); err == nil {
 		// 仓库存在，在仓库目录内运行
 		workDir = repoDir
@@ -40,7 +40,7 @@ func (c *Client) Invoke(workspace string) error {
 		// 仓库不存在，在工作空间根目录运行
 		log.Printf("No repository found, working in: %s", workDir)
 	}
-	
+
 	// 🔥 根据事件类型的具体工作流程 prompt
 	prompt := fmt.Sprintf(`你是一个 GitHub 机器人，收到了一个事件。
 
@@ -96,10 +96,10 @@ B) 其他所有情况（技术询问、表扬、感谢、讨论、新需求等�
 - 如果是对现有 issue 的澄清，简单回复即可
 - 如果需要修改现有 PR，按照 PR Comment 流程处理
 
-关键：不同事件用不同处理方式，不要混淆！`, 
+关键：不同事件用不同处理方式，不要混淆！`,
 		contextPath,
-		c.config.BotName, c.config.BotEmail,  // Issues 事件的身份配置
-		c.config.BotName, c.config.BotEmail)  // PR 修改事件的身份配置
+		c.config.BotName, c.config.BotEmail, // Issues 事件的身份配置
+		c.config.BotName, c.config.BotEmail) // PR 修改事件的身份配置
 
 	// 创建 Claude Code CLI 命令，跳过所有权限检查
 	cmd := exec.Command("npx", "@anthropic-ai/claude-code", "--dangerously-skip-permissions")

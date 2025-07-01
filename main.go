@@ -16,7 +16,6 @@ import (
 	"github.com/xhy/auto-coding/internal/config"
 )
 
-
 func main() {
 	// 加载 .env 文件
 	if err := godotenv.Load(); err != nil {
