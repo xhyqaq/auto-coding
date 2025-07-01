@@ -1,0 +1,71 @@
+name: 构建和发布Docker镜像
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # 当推送版本标签时触发，如 v1.0.0
+  workflow_dispatch:  # 允许手动触发
+    inputs:
+      tag:
+        description: '镜像标签'
+        required: true
+        default: 'latest'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v4
+
+    - name: 设置Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: 登录到Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: 提取元数据
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        tags: |
+          type=ref,event=tag
+          type=raw,value=latest,enable={{is_default_branch}}
+          type=raw,value=${{ github.event.inputs.tag }},enable=${{ github.event_name == 'workflow_dispatch' }}
+
+    - name: 构建和推送Docker镜像
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile
+        platforms: linux/amd64,linux/arm64
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        build-args: |
+          CLAUDE_INSTALL_SOURCE=${{ vars.CLAUDE_INSTALL_SOURCE || 'https://registry.npmjs.org/' }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: 输出镜像信息
+      run: |
+        echo "🎉 Docker镜像构建成功!"
+        echo "📦 镜像地址: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
+        echo "🏷️ 标签: ${{ steps.meta.outputs.tags }}"
+        echo ""
+        echo "使用方法:"
+        echo "docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"

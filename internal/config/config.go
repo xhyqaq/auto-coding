@@ -13,8 +13,21 @@ func Load() *types.BotConfig {
 		WebhookSecret: os.Getenv("WEBHOOK_SECRET"),
 		Port:          getEnvWithDefault("PORT", "8080"),
 		AnthropicKey:  os.Getenv("ANTHROPIC_API_KEY"),
-		BotName:       getEnvWithDefault("BOT_NAME", "agent-auto-coding"),
-		BotEmail:      getEnvWithDefault("BOT_EMAIL", "xhyovo@qq.com"),
+		BotName:       getEnvWithDefault("BOT_NAME", "claude-github-bot"),
+		BotEmail:      getEnvWithDefault("BOT_EMAIL", "bot@example.com"),
+		
+		// Claude CLI 配置
+		ClaudeCommand:       getEnvWithDefault("CLAUDE_COMMAND", "npx @anthropic-ai/claude-code"),
+		ClaudeInstallSource: getEnvWithDefault("CLAUDE_INSTALL_SOURCE", "https://registry.npmjs.org/"),
+		
+		// Docker 配置
+		DockerRegistry:  getEnvWithDefault("DOCKER_REGISTRY", "ghcr.io"),
+		DockerImageName: getEnvWithDefault("DOCKER_IMAGE_NAME", "claude-github-bot"),
+		
+		// GitHub App 配置
+		GitHubAppID:         os.Getenv("GITHUB_APP_ID"),
+		GitHubAppPrivateKey: os.Getenv("GITHUB_APP_PRIVATE_KEY"),
+		GitHubAppKeyFile:    os.Getenv("GITHUB_APP_KEY_FILE"),
 	}
 }
 

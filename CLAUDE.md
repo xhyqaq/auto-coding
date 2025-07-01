@@ -30,12 +30,86 @@ cp .env.example .env
 ### Required Environment Variables
 - `GITHUB_TOKEN`: GitHub Personal Access Token with full repo permissions
 - `WEBHOOK_SECRET`: Secret for webhook validation
+- `ANTHROPIC_API_KEY`: Anthropic Claude API key
 - `PORT`: Server port (default: 8080)
 
 ### Prerequisites
+
+#### 本地开发环境
 - Go 1.21+
 - Node.js (for Claude Code CLI)
 - Claude Code CLI: `npm install -g @anthropic-ai/claude-code`
+
+#### Docker部署 (推荐)
+- Docker 20.10+
+- Docker Compose 2.0+ (可选)
+
+### Docker部署方式
+
+#### 快速开始
+```bash
+# 1. 拉取Docker镜像
+docker pull ghcr.io/xhy/auto-coding:latest
+
+# 2. 复制环境变量配置文件
+cp .env.example .env
+# 编辑 .env 文件，填入你的配置
+
+# 3. 使用docker-compose启动 (推荐)
+docker-compose up -d
+
+# 或者直接使用docker run
+docker run -d \
+  --name claude-github-bot \
+  -p 8080:8080 \
+  --env-file .env \
+  ghcr.io/xhy/auto-coding:latest
+```
+
+#### 自定义Claude安装源
+如果你在中国大陆或有其他npm源需求，可以设置自定义安装源：
+
+```bash
+# 在 .env 文件中设置
+CLAUDE_INSTALL_SOURCE=https://registry.npmmirror.com/
+
+# 或在docker-compose.yml中设置
+environment:
+  - CLAUDE_INSTALL_SOURCE=https://registry.npmmirror.com/
+```
+
+#### 健康检查
+```bash
+# 检查服务状态
+curl http://localhost:8080/health
+
+# 查看Docker容器状态
+docker ps
+docker logs claude-github-bot
+```
+
+### 镜像构建与发布
+
+#### 自动构建
+项目配置了GitHub Actions，当推送版本标签时会自动构建并发布Docker镜像：
+
+```bash
+# 创建并推送版本标签
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+#### 手动构建
+```bash
+# 本地构建镜像
+docker build -t claude-github-bot .
+
+# 构建时指定Claude安装源
+docker build \
+  --build-arg CLAUDE_INSTALL_SOURCE=https://registry.npmmirror.com/ \
+  -t claude-github-bot .
+```
+
 - 必须需要用中文回答我
 
 ## Autonomous Architecture

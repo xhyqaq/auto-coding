@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  claude-github-bot:
+    image: ghcr.io/xhy/auto-coding:latest
+    container_name: claude-github-bot
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      # GitHub配置 (必需)
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - WEBHOOK_SECRET=${WEBHOOK_SECRET}
+      
+      # Anthropic API配置 (必需)
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      
+      # 服务器配置
+      - PORT=8080
+      
+      # Bot配置
+      - BOT_NAME=${BOT_NAME:-claude-github-bot}
+      - BOT_EMAIL=${BOT_EMAIL:-bot@example.com}
+      
+      # Claude CLI配置
+      - CLAUDE_COMMAND=${CLAUDE_COMMAND:-npx @anthropic-ai/claude-code}
+      - CLAUDE_INSTALL_SOURCE=${CLAUDE_INSTALL_SOURCE:-https://registry.npmjs.org/}
+      
+      # Docker配置
+      - DOCKER_REGISTRY=${DOCKER_REGISTRY:-ghcr.io}
+      - DOCKER_IMAGE_NAME=${DOCKER_IMAGE_NAME:-claude-github-bot}
+      
+      # GitHub App配置 (可选)
+      - GITHUB_APP_ID=${GITHUB_APP_ID}
+      - GITHUB_APP_PRIVATE_KEY=${GITHUB_APP_PRIVATE_KEY}
+      - GITHUB_APP_KEY_FILE=${GITHUB_APP_KEY_FILE}
+    volumes:
+      # 如果使用文件形式的GitHub App私钥
+      - ${GITHUB_APP_KEY_FILE_PATH:-./github-app.pem}:/app/github-app.pem:ro
+      # 工作空间持久化 (可选)
+      - ./workspaces:/app/workspaces
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    # 资源限制
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+    # 日志配置
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+# 网络配置 (可选)
+networks:
+  default:
+    name: claude-bot-network

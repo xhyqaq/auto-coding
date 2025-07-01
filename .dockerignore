@@ -1,0 +1,60 @@
+# Git相关
+.git
+.gitignore
+.gitattributes
+
+# 开发环境
+.env
+.env.local
+.env.example
+
+# IDE相关
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 构建产物
+claude-github-bot
+*.exe
+*.dll
+*.so
+*.dylib
+
+# 测试相关
+*.test
+coverage.txt
+coverage.out
+
+# 依赖缓存
+vendor/
+
+# 日志文件
+*.log
+
+# 操作系统
+.DS_Store
+Thumbs.db
+
+# Docker相关
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# 文档
+README.md
+*.md
+
+# 工作空间
+workspaces/
+
+# Node.js相关 (如果有前端代码)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 临时文件
+*.tmp
+*.temp
