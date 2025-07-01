@@ -54,22 +54,17 @@ RUN addgroup -g 1001 -S appgroup && \
 # 设置工作目录
 WORKDIR /app
 
-# 安装 Claude Code CLI (支持自定义安装源)
-ARG CLAUDE_INSTALL_SOURCE=""
-ENV CLAUDE_INSTALL_SOURCE=${CLAUDE_INSTALL_SOURCE}
-
-# 安装 Claude CLI
-RUN if [ -n "$CLAUDE_INSTALL_SOURCE" ]; then \
-        npm config set registry $CLAUDE_INSTALL_SOURCE; \
-    fi && \
-    npm install -g @anthropic-ai/claude-code && \
-    npm cache clean --force
+# Claude CLI将在运行时动态安装
 
 # 从构建阶段复制二进制文件
 COPY --from=builder /app/claude-github-bot .
 
-# 创建必要的目录
-RUN mkdir -p /app/workspaces && \
+# 复制启动脚本
+COPY entrypoint.sh .
+
+# 设置权限和目录
+RUN chmod +x entrypoint.sh && \
+    mkdir -p /app/workspaces && \
     chown -R appuser:appgroup /app
 
 # 切换到应用用户
@@ -81,6 +76,9 @@ EXPOSE 8080
 # 健康检查
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8080/health || exit 1
+
+# 设置启动脚本
+ENTRYPOINT ["./entrypoint.sh"]
 
 # 启动应用
 CMD ["./claude-github-bot"]

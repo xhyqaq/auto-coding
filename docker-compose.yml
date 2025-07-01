@@ -25,6 +25,7 @@ services:
       # Claude CLI配置
       - CLAUDE_COMMAND=${CLAUDE_COMMAND:-npx @anthropic-ai/claude-code}
       - CLAUDE_INSTALL_SOURCE=${CLAUDE_INSTALL_SOURCE:-https://registry.npmjs.org/}
+      - CLAUDE_INSTALL_CMD=${CLAUDE_INSTALL_CMD:-npm install -g @anthropic-ai/claude-code}
       
       # Docker配置
       - DOCKER_REGISTRY=${DOCKER_REGISTRY:-ghcr.io}
