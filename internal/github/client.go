@@ -58,13 +58,19 @@ func (c *Client) CloneRepository(repoURL, workspace string) error {
 	return nil
 }
 
-// addTokenToURL 在GitHub URL中添加token认证
+// addTokenToURL 在Git URL中添加token认证（支持GitHub和Gitee）
 func (c *Client) addTokenToURL(repoURL string) string {
-	// 如果是GitHub URL，添加token认证
+	// 支持GitHub URL
 	if len(repoURL) > 19 && repoURL[:19] == "https://github.com/" {
 		return fmt.Sprintf("https://%s@github.com/%s", c.config.GitHubToken, repoURL[19:])
 	}
-	// 如果已经包含认证信息或不是GitHub URL，直接返回
+	
+	// 支持Gitee URL
+	if len(repoURL) > 18 && repoURL[:18] == "https://gitee.com/" {
+		return fmt.Sprintf("https://%s@gitee.com/%s", c.config.GitHubToken, repoURL[18:])
+	}
+	
+	// 如果已经包含认证信息或不是支持的Git平台URL，直接返回
 	return repoURL
 }
 

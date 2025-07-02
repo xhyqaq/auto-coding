@@ -1,6 +1,6 @@
-# Claude GitHub Bot
+# Claude Git Bot
 
-一个完全自主的 Claude GitHub Bot，接收所有 GitHub 事件并让 Claude 自主决定如何处理。
+一个完全自主的 Claude Git Bot，支持 GitHub 和 Gitee，接收所有 Git 平台事件并让 Claude 自主决定如何处理。
 
 ## 快速开始
 
@@ -36,7 +36,7 @@ docker run -d \
 
 ### 必需变量
 ```bash
-GITHUB_TOKEN=ghp_your_token_here       # GitHub Personal Access Token (repo权限)
+GITHUB_TOKEN=your_token_here           # Git平台访问令牌 (GitHub/Gitee)
 WEBHOOK_SECRET=your_secret_here        # Webhook验证密钥
 ```
 
@@ -70,7 +70,9 @@ docker run -d \
 ```
 
 
-## GitHub 配置
+## Git平台配置
+
+### GitHub 配置
 
 1. **创建 Personal Access Token**
    - 前往 GitHub Settings > Developer settings > Personal access tokens
@@ -83,6 +85,19 @@ docker run -d \
      - Content type: `application/json`
      - Secret: 与 `WEBHOOK_SECRET` 相同
      - 选择 "Send me everything"
+
+### Gitee 配置
+
+1. **创建私人令牌**
+   - 前往 Gitee Settings > 私人令牌
+   - 创建令牌，选择 `projects` 权限
+
+2. **配置 WebHook**
+   - 前往仓库 管理 > WebHooks
+   - 添加 webhook：
+     - URL: `http://your-server.com:8888/webhook`
+     - 密码: 与 `WEBHOOK_SECRET` 相同
+     - 选择 "Push", "Issues", "Pull Request" 等事件
 
 ## 使用方法
 

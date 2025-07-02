@@ -1,6 +1,9 @@
 package bot
 
 import (
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -153,6 +156,74 @@ func (b *Bot) isBotUser(username string) bool {
 	return false
 }
 
+// detectWebhookSource 检测webhook来源（GitHub或Gitee）
+func (b *Bot) detectWebhookSource(r *http.Request) string {
+	// 检查GitHub特有的header
+	if r.Header.Get("X-GitHub-Event") != "" {
+		return "github"
+	}
+	
+	// 检查Gitee特有的header
+	if r.Header.Get("X-Gitee-Event") != "" || r.Header.Get("X-Gitee-Token") != "" {
+		return "gitee"
+	}
+	
+	// 默认按GitHub处理
+	return "github"
+}
+
+// validateGitHubWebhook 验证GitHub webhook
+func (b *Bot) validateGitHubWebhook(r *http.Request) ([]byte, error) {
+	return github.ValidatePayload(r, []byte(b.config.WebhookSecret))
+}
+
+// validateGiteeWebhook 验证Gitee webhook
+func (b *Bot) validateGiteeWebhook(r *http.Request) ([]byte, error) {
+	// 读取请求体
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read request body: %v", err)
+	}
+
+	// Gitee使用X-Gitee-Token header进行验证
+	giteeToken := r.Header.Get("X-Gitee-Token")
+	if giteeToken != "" {
+		// 验证token是否匹配
+		if giteeToken != b.config.WebhookSecret {
+			return nil, fmt.Errorf("gitee token mismatch")
+		}
+	} else {
+		// 如果没有X-Gitee-Token，使用HMAC验证（一些Gitee配置）
+		signature := r.Header.Get("X-Gitee-Signature")
+		if signature == "" {
+			return nil, fmt.Errorf("no gitee signature found")
+		}
+		
+		// 验证HMAC签名
+		mac := hmac.New(sha256.New, []byte(b.config.WebhookSecret))
+		mac.Write(body)
+		expectedSignature := hex.EncodeToString(mac.Sum(nil))
+		
+		if signature != expectedSignature {
+			return nil, fmt.Errorf("gitee signature mismatch")
+		}
+	}
+	
+	return body, nil
+}
+
+// getEventType 获取事件类型
+func (b *Bot) getEventType(r *http.Request, source string) string {
+	switch source {
+	case "github":
+		return github.WebHookType(r)
+	case "gitee":
+		return r.Header.Get("X-Gitee-Event")
+	default:
+		return github.WebHookType(r)
+	}
+}
+
 // HandleGitHubEvent 处理 GitHub 事件 - 完全委托给 Claude
 func (b *Bot) HandleGitHubEvent(eventType string, payload interface{}) error {
 	// 检查是否是机器人自己产生的事件（避免自回复循环）
@@ -201,19 +272,34 @@ func (b *Bot) HandleGitHubEvent(eventType string, payload interface{}) error {
 	return b.claudeClient.Invoke(workspace)
 }
 
-// WebhookHandler Webhook 处理器 - 完全开放模式
+// WebhookHandler Webhook 处理器 - 支持GitHub和Gitee
 func (b *Bot) WebhookHandler(w http.ResponseWriter, r *http.Request) {
-	// 验证 payload
-	payload, err := github.ValidatePayload(r, []byte(b.config.WebhookSecret))
+	// 检测webhook来源
+	source := b.detectWebhookSource(r)
+	log.Printf("Detected webhook source: %s", source)
+
+	// 根据来源验证payload
+	var payload []byte
+	var err error
+	
+	switch source {
+	case "github":
+		payload, err = b.validateGitHubWebhook(r)
+	case "gitee":
+		payload, err = b.validateGiteeWebhook(r)
+	default:
+		payload, err = b.validateGitHubWebhook(r)
+	}
+	
 	if err != nil {
-		log.Printf("Invalid payload: %v", err)
+		log.Printf("Invalid %s payload: %v", source, err)
 		http.Error(w, "Invalid payload", http.StatusBadRequest)
 		return
 	}
 
 	// 获取事件类型
-	eventType := github.WebHookType(r)
-	log.Printf("Received GitHub event: %s", eventType)
+	eventType := b.getEventType(r, source)
+	log.Printf("Received %s event: %s", source, eventType)
 
 	// 解析 payload
 	parsedPayload, err := b.githubClient.ParseWebhookPayload(payload)
@@ -223,10 +309,13 @@ func (b *Bot) WebhookHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// 在payload中添加来源信息
+	parsedPayload["webhook_source"] = source
+
 	// 异步处理所有事件，不做任何过滤
 	go func() {
 		if err := b.HandleGitHubEvent(eventType, parsedPayload); err != nil {
-			log.Printf("Failed to handle GitHub event %s: %v", eventType, err)
+			log.Printf("Failed to handle %s event %s: %v", source, eventType, err)
 		}
 	}()
 
