@@ -102,13 +102,12 @@ B) 其他所有情况（技术询问、表扬、感谢、讨论、新需求等�
 		c.config.BotName, c.config.BotEmail) // PR 修改事件的身份配置
 
 	// 创建 Claude Code CLI 命令，跳过所有权限检查
-	cmd := exec.Command("npx", "@anthropic-ai/claude-code", "--dangerously-skip-permissions")
+	cmd := exec.Command(c.config.ClaudeCommand, "--dangerously-skip-permissions")
 	cmd.Dir = workDir
 
 	// 设置环境变量，给 Claude 完整的上下文
 	cmd.Env = append(os.Environ(),
 		"GITHUB_TOKEN="+c.config.GitHubToken,
-		"ANTHROPIC_API_KEY="+c.config.AnthropicKey,
 		"CLAUDE_WORKSPACE="+workspace,
 		"CLAUDE_MODE=autonomous",
 	)
