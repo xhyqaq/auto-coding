@@ -23,8 +23,8 @@ go build -o claude-github-bot main.go
 ### Environment Setup
 ```bash
 # Copy environment template
-cp .env.example .env
-# Edit .env with your tokens and configuration
+cp test.env.example test.env
+# Edit test.env with your tokens and configuration
 ```
 
 ### Required Environment Variables
@@ -54,8 +54,8 @@ cp .env.example .env
 docker pull ghcr.io/xhy/auto-coding:latest
 
 # 2. 复制环境变量配置文件
-cp .env.example .env
-# 编辑 .env 文件，填入你的配置
+cp test.env.example test.env
+# 编辑 test.env 文件，填入你的配置
 
 # 3. 使用docker-compose启动 (推荐)
 docker-compose up -d
@@ -64,7 +64,7 @@ docker-compose up -d
 docker run -d \
   --name claude-github-bot \
   -p 8888:8080 \
-  --env-file .env \
+  --env-file test.env \
   -v ~/.claude:/app/.claude:ro \
   ghcr.io/xhy/auto-coding:latest
 ```
@@ -88,7 +88,7 @@ ANTHROPIC_API_KEY=your_api_key_here
 如果你在中国大陆或有其他npm源需求，可以设置自定义安装源：
 
 ```bash
-# 在 .env 文件中设置
+# 在 test.env 文件中设置
 CLAUDE_INSTALL_SOURCE=https://registry.npmmirror.com/
 
 # 或在docker-compose.yml中设置

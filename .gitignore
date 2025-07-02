@@ -13,7 +13,7 @@ claude-github-bot
 *.dylib
 
 # 环境变量文件
-.env
+test.env
 
 # 测试覆盖率文件
 *.out

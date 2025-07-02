@@ -11,17 +11,11 @@ type BotConfig struct {
 	GitHubToken   string
 	WebhookSecret string
 	Port          string
-	AnthropicKey  string
 	BotName       string // Bot 提交时使用的名称
 	BotEmail      string // Bot 提交时使用的邮箱
 
 	// Claude CLI 配置
-	ClaudeCommand       string // Claude CLI 命令
-	ClaudeInstallSource string // Claude CLI 安装源
-
-	// Docker 配置
-	DockerRegistry  string // Docker 镜像仓库
-	DockerImageName string // Docker 镜像名称
+	ClaudeCommand string // Claude CLI 命令
 
 	// GitHub App 配置
 	GitHubAppID         string // GitHub App ID

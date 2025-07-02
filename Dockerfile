@@ -54,7 +54,7 @@ RUN addgroup -g 1001 -S appgroup && \
 # 设置工作目录
 WORKDIR /app
 
-# Claude CLI将在运行时动态安装
+# Claude CLI需要用户手动安装并挂载配置目录或提供API Key
 
 # 从构建阶段复制二进制文件
 COPY --from=builder /app/claude-github-bot .

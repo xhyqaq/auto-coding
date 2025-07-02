@@ -28,6 +28,7 @@ docker run -d \
   --name claude-github-bot \
   -p 8888:8080 \
   --env-file .env \
+  -v ~/.claude:/app/.claude:ro \
   ghcr.io/xhyqaq/auto-coding:latest
 ```
 
@@ -41,29 +42,33 @@ WEBHOOK_SECRET=your_secret_here        # Webhook验证密钥
 
 ### 可选变量
 ```bash
-ANTHROPIC_API_KEY=your_key_here                                      # Claude API Key (如果CLI未登录)
-CLAUDE_INSTALL_SOURCE=https://registry.npmmirror.com/               # npm镜像源(国内用户)
-CLAUDE_INSTALL_CMD="npm install -g @anthropic-ai/claude-code"       # Claude安装命令(可自定义)
-BOT_NAME=claude-github-bot                                           # Git提交者名称
-BOT_EMAIL=bot@example.com                                            # Git提交者邮箱
-PORT=8080                                                            # 服务端口
+BOT_NAME=claude-github-bot            # Git提交者名称
+BOT_EMAIL=bot@example.com             # Git提交者邮箱
+PORT=8080                             # 服务端口
+CLAUDE_COMMAND=claude                 # Claude CLI命令
 ```
 
-#### Claude CLI 安装示例
+## Claude CLI 准备
+
+**重要**: 容器不会自动安装 Claude CLI，需要用户手动安装。
+
+### 安装和配置步骤
 ```bash
-# 默认安装
-CLAUDE_INSTALL_CMD="npm install -g @anthropic-ai/claude-code"
+# 1. 在主机上安装 Claude CLI
+npm install -g @anthropic-ai/claude-code
 
-# 使用国内镜像源
-CLAUDE_INSTALL_SOURCE="https://registry.npmmirror.com/"
-CLAUDE_INSTALL_CMD="npm install -g @anthropic-ai/claude-code"
+# 2. 登录 Claude CLI
+claude auth login
 
-# 安装特定版本
-CLAUDE_INSTALL_CMD="npm install -g @anthropic-ai/claude-code@1.0.0"
-
-# 使用yarn安装
-CLAUDE_INSTALL_CMD="yarn global add @anthropic-ai/claude-code"
+# 3. 启动容器时挂载配置目录
+docker run -d \
+  --name claude-github-bot \
+  -p 8888:8080 \
+  --env-file .env \
+  -v ~/.claude:/app/.claude:ro \
+  ghcr.io/xhyqaq/auto-coding:latest
 ```
+
 
 ## GitHub 配置
 

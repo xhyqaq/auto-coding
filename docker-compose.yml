@@ -12,8 +12,6 @@ services:
       - GITHUB_TOKEN=${GITHUB_TOKEN}
       - WEBHOOK_SECRET=${WEBHOOK_SECRET}
       
-      # Anthropic API配置 (可选，如果Claude CLI未登录则需要)
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
       
       # 服务器配置
       - PORT=8080
@@ -23,13 +21,7 @@ services:
       - BOT_EMAIL=${BOT_EMAIL:-bot@example.com}
       
       # Claude CLI配置
-      - CLAUDE_COMMAND=${CLAUDE_COMMAND:-npx @anthropic-ai/claude-code}
-      - CLAUDE_INSTALL_SOURCE=${CLAUDE_INSTALL_SOURCE:-https://registry.npmjs.org/}
-      - CLAUDE_INSTALL_CMD=${CLAUDE_INSTALL_CMD:-npm install -g @anthropic-ai/claude-code}
-      
-      # Docker配置
-      - DOCKER_REGISTRY=${DOCKER_REGISTRY:-ghcr.io}
-      - DOCKER_IMAGE_NAME=${DOCKER_IMAGE_NAME:-claude-github-bot}
+      - CLAUDE_COMMAND=${CLAUDE_COMMAND:-claude}
       
       # GitHub App配置 (可选)
       - GITHUB_APP_ID=${GITHUB_APP_ID}

@@ -17,9 +17,9 @@ import (
 )
 
 func main() {
-	// 加载 .env 文件
+	// 加载 test.env 文件
 	if err := godotenv.Load(); err != nil {
-		log.Println("Warning: .env file not found, using system environment variables")
+		log.Println("Warning: test.env file not found, using system environment variables")
 	}
 
 	config := config.Load()
