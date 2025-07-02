@@ -42,7 +42,12 @@ func (c *Client) GetClient() *github.Client {
 // CloneRepository 克隆仓库到工作空间
 func (c *Client) CloneRepository(repoURL, workspace string) error {
 	repoDir := filepath.Join(workspace, "repository")
-	cmd := exec.Command("git", "clone", repoURL, repoDir)
+	
+	// 使用GitHub token进行认证的clone URL
+	// 将 https://github.com/owner/repo 转换为 https://token@github.com/owner/repo
+	authenticatedURL := c.addTokenToURL(repoURL)
+	
+	cmd := exec.Command("git", "clone", authenticatedURL, repoDir)
 	cmd.Env = append(cmd.Env, "GIT_TERMINAL_PROMPT=0")
 
 	if output, err := cmd.CombinedOutput(); err != nil {
@@ -51,6 +56,16 @@ func (c *Client) CloneRepository(repoURL, workspace string) error {
 
 	log.Printf("Successfully cloned repository to %s", repoDir)
 	return nil
+}
+
+// addTokenToURL 在GitHub URL中添加token认证
+func (c *Client) addTokenToURL(repoURL string) string {
+	// 如果是GitHub URL，添加token认证
+	if len(repoURL) > 19 && repoURL[:19] == "https://github.com/" {
+		return fmt.Sprintf("https://%s@github.com/%s", c.config.GitHubToken, repoURL[19:])
+	}
+	// 如果已经包含认证信息或不是GitHub URL，直接返回
+	return repoURL
 }
 
 // ParseWebhookPayload 解析 webhook payload
